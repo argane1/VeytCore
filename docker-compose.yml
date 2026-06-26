@@ -16,9 +16,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    # Uncomment to expose Postgres to host:
-    # ports:
-    #   - "5432:5432"
+    ports:
+       - "5432:5432"
 
   # --- MinIO Object Storage ---
   minio:
@@ -37,10 +36,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    # Uncomment to expose MinIO to host:
-    # ports:
-    #   - "9000:9000"
-    #   - "9001:9001"
 
   # --- Inngest Dev Server ---
   inngest:
@@ -54,9 +49,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    # Uncomment to expose Inngest dashboard to host:
-    # ports:
-    #   - "8288:8288"
 
   # --- NextCRM Application ---
   app:
@@ -67,20 +59,13 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # Database — values come from the same env vars as the postgres
-      # service above so a single override changes both sides.
       DATABASE_URL: postgresql://${POSTGRES_USER:-nextcrm}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-nextcrm}
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_USER: ${POSTGRES_USER:-nextcrm}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       DB_NAME: ${POSTGRES_DB:-nextcrm}
-
-      # Auth
       BETTER_AUTH_URL: http://localhost:3000
-      # BETTER_AUTH_SECRET is auto-generated if not set
-
-      # MinIO — values come from the same env vars as the minio service.
       NEXT_PUBLIC_MINIO_ENDPOINT: http://minio:9000
       MINIO_ENDPOINT: http://minio:9000
       MINIO_PORT: "9000"
@@ -88,33 +73,15 @@ services:
       MINIO_USE_SSL: "false"
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-nextcrm}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-changeme}
-
-      # Inngest
       INNGEST_DEV: "1"
       INNGEST_ID: nextcrm
       INNGEST_APP_NAME: NextCRM
       INNGEST_EVENT_KEY: local
       INNGEST_SIGNING_KEY: ""
       INNGEST_BASE_URL: http://inngest:8288
-
-      # App
       NEXT_PUBLIC_APP_NAME: NextCRM
       NEXT_PUBLIC_APP_URL: http://localhost:3000
-
-      # Initial admin account (created on first run by the seed script).
-      # IMPORTANT: set this to a real email you control. The app uses
-      # passwordless Email OTP, so the placeholder default cannot
-      # receive login codes. Override via .env on first start, then
-      # configure SMTP/Resend (RESEND_API_KEY) so OTP emails actually
-      # send. Without an email provider you can read the OTP from
-      # the database directly.
       TEST_USER_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
-
-      # Placeholder values for optional external services.
-      # The app initializes these clients at module load time, so empty
-      # values cause crashes. Users override these via .env to enable
-      # the corresponding features. The app runs fine with placeholders;
-      # individual features just won't work until real keys are provided.
       OPENAI_API_KEY: ${OPENAI_API_KEY:-sk-placeholder-replace-to-enable-ai}
       RESEND_API_KEY: ${RESEND_API_KEY:-re_placeholder_replace_to_enable_email}
       GOOGLE_ID: ${GOOGLE_ID:-}
